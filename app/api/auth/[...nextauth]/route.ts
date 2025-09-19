@@ -1,5 +1,4 @@
-// /app/api/auth/[...nextauth]/route.ts
-import NextAuth from 'next-auth';
+﻿import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from '@/auth.config';
 import { z } from 'zod';
@@ -9,13 +8,12 @@ import type { User } from '@/app/lib/definitions';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-// Helper: fetch user from database
 async function getUser(email: string): Promise<User | null> {
   const users = await sql<User[]>`SELECT * FROM users WHERE email = ${email}`;
   return users[0] ?? null;
 }
 
-export const auth = NextAuth({
+const authOptions = {
   ...authConfig,
   providers: [
     Credentials({
@@ -44,4 +42,7 @@ export const auth = NextAuth({
       },
     }),
   ],
-});
+} as const;
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };

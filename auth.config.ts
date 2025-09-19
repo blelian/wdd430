@@ -1,7 +1,7 @@
 // auth.config.ts
 import type { NextAuthConfig } from 'next-auth';
 
-export const authConfig = {
+export const authConfig: NextAuthConfig = {
   pages: {
     signIn: '/login', // custom login page
   },
@@ -14,8 +14,8 @@ export const authConfig = {
       // Only allow logged-in users on /dashboard
       if (isOnDashboard) {
         return isLoggedIn;
-      } 
-      
+      }
+
       // Redirect logged-in users away from public pages
       if (isLoggedIn) {
         return Response.redirect(new URL('/dashboard', nextUrl));
@@ -25,4 +25,4 @@ export const authConfig = {
     },
   },
   providers: [], // will add Credentials provider in auth.ts
-} satisfies NextAuthConfig;
+};
