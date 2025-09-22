@@ -4,7 +4,7 @@ import postgres from 'postgres';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { signIn } from '@/auth';
+import { signIn, signOut } from '@/auth'; // import directly from auth.ts
 import { AuthError } from 'next-auth';
 
 // Database client
@@ -33,6 +33,13 @@ export async function authenticate(
 }
 
 // ----------------------
+// LOGOUT ACTION
+// ----------------------
+export async function logout() {
+  await signOut({ redirectTo: '/' });
+}
+
+// ----------------------
 // INVOICE ACTIONS
 // ----------------------
 const InvoiceSchema = z.object({
@@ -51,7 +58,10 @@ export type State = {
 };
 
 // Create invoice
-export async function createInvoiceAction(prevState: State, formData: FormData): Promise<State> {
+export async function createInvoiceAction(
+  prevState: State,
+  formData: FormData
+): Promise<State> {
   const validated = InvoiceSchema.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
