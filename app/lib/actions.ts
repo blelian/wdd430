@@ -4,10 +4,37 @@ import postgres from 'postgres';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 
 // Database client
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
+// ----------------------
+// LOGIN ACTION
+// ----------------------
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
+  }
+}
+
+// ----------------------
+// INVOICE ACTIONS
+// ----------------------
 const InvoiceSchema = z.object({
   customerId: z.string({ required_error: 'Please select a customer.' }),
   amount: z.coerce.number().gt(0, { message: 'Amount must be greater than $0.' }),
@@ -23,7 +50,7 @@ export type State = {
   message?: string | null;
 };
 
-// Create invoice action
+// Create invoice
 export async function createInvoiceAction(prevState: State, formData: FormData): Promise<State> {
   const validated = InvoiceSchema.safeParse({
     customerId: formData.get('customerId'),
@@ -54,8 +81,11 @@ export async function createInvoiceAction(prevState: State, formData: FormData):
   return { message: 'Invoice created successfully!', errors: {} };
 }
 
-// Edit invoice action
-export async function editInvoiceAction(prevState: State, payload: { invoiceId: string; formData: FormData }): Promise<State> {
+// Edit invoice
+export async function editInvoiceAction(
+  prevState: State,
+  payload: { invoiceId: string; formData: FormData }
+): Promise<State> {
   const { invoiceId, formData } = payload;
 
   const validated = InvoiceSchema.safeParse({
