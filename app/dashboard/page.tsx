@@ -1,7 +1,4 @@
-'use client';
-
-export const dynamic = 'force-dynamic';
-
+// app/dashboard/page.tsx
 import { Suspense } from 'react';
 import { lusitana } from '@/app/ui/fonts';
 import CardWrapper from '@/app/ui/dashboard/cards';
